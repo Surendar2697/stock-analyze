@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stock News Collector</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>Stock News Collector</header>
+  <div class="container">
+    <div class="search-box">
+      <input type="text" id="stockName" placeholder="Enter stock name (e.g., TCS)" />
+      <button onclick="fetchNews()">Get News</button>
+    </div>
+    <div class="loader" id="loader">Fetching news...</div>
+    <div id="newsContainer"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
