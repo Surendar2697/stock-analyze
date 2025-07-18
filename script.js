@@ -12,7 +12,7 @@ async function fetchNews() {
   newsContainer.innerHTML = '';
 
   try {
-    const response = await fetch(`https://009f453e-133a-4d75-a846-e8e2171b3069-00-3m4h87ld4ddq3.sisko.replit.dev:3000/get-news?query=${stockName}`);
+    const response = await fetch(`http://18.234.85.94:5000/get-news?query=${stockName}`);
     const data = await response.json();
 
     loader.style.display = 'none';
