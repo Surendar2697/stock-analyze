@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Stock News</title>
+  <title>Stock News Filter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * {
@@ -121,7 +121,6 @@
 </head>
 <body>
 
-  <!-- Sticky Top Section -->
   <div class="sticky-header">
     <div class="container">
       <h1>Get Stock News (Last 24 Hrs)</h1>
@@ -132,115 +131,115 @@
     </div>
   </div>
 
-  <!-- Main News Section -->
   <div class="container">
     <div id="loader">Loading...</div>
     <div id="newsContainer"></div>
   </div>
 
- <script>
-  async function fetchNews() {
-    const stockName = document.getElementById('stockName').value.trim();
-    const loader = document.getElementById('loader');
-    const newsContainer = document.getElementById('newsContainer');
+  <script>
+    async function fetchNews() {
+      const stockName = document.getElementById('stockName').value.trim();
+      const loader = document.getElementById('loader');
+      const newsContainer = document.getElementById('newsContainer');
 
-    if (!stockName) {
-      alert("Please enter a stock name.");
-      return;
-    }
-
-    loader.style.display = 'block';
-    newsContainer.innerHTML = '';
-
-    try {
-      const proxy = 'https://cors-anywhere.herokuapp.com/';
-      const target = `http://18.234.85.94:5000/get-news?query=${stockName}`;
-
-      // Step 1: Get raw headlines from Flask backend
-      const flaskResponse = await fetch(proxy + target, {
-        method: 'GET',
-        headers: {
-          'Origin': 'https://surendar2697.github.io',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      });
-
-      const flaskData = await flaskResponse.json();
-      const headlines = flaskData.headlines;
-
-      if (!headlines || headlines.length === 0) {
-        loader.style.display = 'none';
-        newsContainer.innerHTML = "<p>No headlines found.</p>";
+      if (!stockName) {
+        alert("Please enter a stock name.");
         return;
       }
 
-      // Step 2: Send to Gemini to filter stock-relevant news
-      const prompt = `
+      loader.style.display = 'block';
+      newsContainer.innerHTML = '';
+
+      try {
+        const proxy = 'https://cors-anywhere.herokuapp.com/';
+        const target = `http://18.234.85.94:5000/get-news?query=${stockName}`;
+
+        // Step 1: Get raw headlines from Flask backend
+        const flaskResponse = await fetch(proxy + target, {
+          method: 'GET',
+          headers: {
+            'Origin': 'https://surendar2697.github.io',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        const flaskData = await flaskResponse.json();
+        const headlines = flaskData.headlines;
+
+        if (!headlines || headlines.length === 0) {
+          loader.style.display = 'none';
+          newsContainer.innerHTML = "<p>No headlines found.</p>";
+          return;
+        }
+
+        // Step 2: Send to Gemini to filter stock-relevant news
+        const prompt = `
 Filter only the news headlines relevant to the stock/company "${stockName}". 
 Return only the relevant headlines from the list below as a JSON array.
 
 Headlines:
 ${JSON.stringify(headlines, null, 2)}
-      `;
+        `;
 
-      const geminiResponse = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyChcHmb5FRRDtJVmCi12LXZuAPe3rEjrqA',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: prompt
-                  }
-                ]
-              }
-            ]
-          })
-        }
-      );
+        const geminiResponse = await fetch(
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyChcHmb5FRRDtJVmCi12LXZuAPe3rEjrqA',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: prompt
+                    }
+                  ]
+                }
+              ]
+            })
+          }
+        );
 
-      const geminiData = await geminiResponse.json();
-      const geminiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+        const geminiData = await geminiResponse.json();
+        const geminiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
 
-      let filteredHeadlines = [];
-      try {
-        filteredHeadlines = JSON.parse(geminiText);
-      } catch (err) {
-        console.error("Failed to parse Gemini response:", err);
-        newsContainer.innerHTML = "<p>Error parsing Gemini response.</p>";
+        // Step 3: Display Gemini-filtered result as-is (cleaned)
         loader.style.display = 'none';
-        return;
+
+        if (!geminiText) {
+          newsContainer.innerHTML = "<p>No output from Gemini.</p>";
+          return;
+        }
+
+        // Remove markdown ```json and ``` if present
+        let cleanedText = geminiText
+          .replace(/```json|```/g, '')
+          .trim()
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line); // remove empty lines
+
+        // Remove first and last elements
+        cleanedText.shift(); // removes first element
+        cleanedText.pop();   // removes last element
+
+        const list = document.createElement('ol');
+        cleanedText.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item.replace(/^"|"$/g, '');
+          list.appendChild(li);
+        });
+
+        newsContainer.appendChild(list);
+
+      } catch (error) {
+        loader.style.display = 'none';
+        newsContainer.innerHTML = "<p>Error fetching or filtering headlines.</p>";
+        console.error(error);
       }
-
-      // Step 3: Display filtered headlines
-      loader.style.display = 'none';
-
-      if (filteredHeadlines.length === 0) {
-        newsContainer.innerHTML = "<p>No relevant headlines found.</p>";
-        return;
-      }
-
-      const list = document.createElement('ol');
-      filteredHeadlines.forEach((headline) => {
-        const li = document.createElement('li');
-        li.textContent = headline;
-        list.appendChild(li);
-      });
-
-      newsContainer.appendChild(list);
-
-    } catch (error) {
-      loader.style.display = 'none';
-      newsContainer.innerHTML = "<p>Error fetching or filtering headlines.</p>";
-      console.error(error);
     }
-  }
-</script>
-
+  </script>
 </body>
 </html>
