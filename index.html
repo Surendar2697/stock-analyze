@@ -2,115 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Stock News Collector</title>
+  <title>Stock News</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f2f3f7;
+      font-family: Arial, sans-serif;
+      padding: 20px;
     }
-
-    header {
-      background: #007bff;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
+    #loader {
+      display: none;
     }
-
-    .container {
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 1rem;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .input-group {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-      flex-direction: row;
-    }
-
-    .input-group input {
-      flex: 1;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    .input-group button {
-      padding: 0.75rem 1rem;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    ul {
-      padding: 0;
-      list-style: none;
-    }
-
-    ul li {
-      margin-bottom: 0.75rem;
-      font-size: 1rem;
-      line-height: 1.4;
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        margin: 1rem;
-        padding: 1rem;
-      }
-
-      .input-group {
-        flex-direction: column;
-      }
-
-      .input-group button {
-        width: 100%;
-      }
+    ol {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <header>Stock News Collector</header>
-  <div class="container">
-    <div class="input-group">
-      <input type="text" id="query" placeholder="Enter company name...">
-      <button onclick="fetchNews()">Get News</button>
-    </div>
-    <ul id="newsList"></ul>
-  </div>
+  <h1>Get Stock News (Last 24 Hrs)</h1>
+
+  <input type="text" id="stockName" placeholder="Enter stock name (e.g., TCS)">
+  <button onclick="fetchNews()">Get News</button>
+
+  <div id="loader">Loading...</div>
+  <div id="newsContainer"></div>
 
   <script>
     async function fetchNews() {
-      const query = document.getElementById('query').value.trim();
-      const newsList = document.getElementById('newsList');
-      newsList.innerHTML = "Loading...";
+      const stockName = document.getElementById('stockName').value.trim();
+      const loader = document.getElementById('loader');
+      const newsContainer = document.getElementById('newsContainer');
+
+      if (!stockName) {
+        alert("Please enter a stock name.");
+        return;
+      }
+
+      loader.style.display = 'block';
+      newsContainer.innerHTML = '';
 
       try {
-        const response = await fetch(`http://18.234.85.94:5000/get-news?query=${query}`);
-        const data = await response.json();
+        const proxy = 'https://cors-anywhere.herokuapp.com/';
+        const target = `http://18.234.85.94:5000/get-news?query=${stockName}`;
+        const response = await fetch(proxy + target, {
+          headers: {
+            'Origin': 'https://surendar2697.github.io'
+          }
+        });
 
-        if (data && Array.isArray(data.headlines)) {
-          newsList.innerHTML = "";
-          data.headlines.forEach((headline, index) => {
-            const li = document.createElement("li");
-            li.textContent = `${index + 1}. ${headline}`;
-            newsList.appendChild(li);
-          });
-        } else {
-          newsList.innerHTML = "<li>No news found.</li>";
+        const data = await response.json();
+        loader.style.display = 'none';
+
+        if (!data.headlines || data.headlines.length === 0) {
+          newsContainer.innerHTML = "<p>No headlines found.</p>";
+          return;
         }
+
+        const list = document.createElement('ol');
+        data.headlines.forEach((headline, index) => {
+          const cleanHeadline = headline.replace(/^\d+\.\s*/, ''); // Remove leading numbers
+          const li = document.createElement('li');
+          li.textContent = cleanHeadline;
+          list.appendChild(li);
+        });
+
+        newsContainer.appendChild(list);
+
       } catch (error) {
-        newsList.innerHTML = `<li>Error fetching news: ${error.message}</li>`;
+        loader.style.display = 'none';
+        newsContainer.innerHTML = "<p>Error fetching headlines. Try again later.</p>";
+        console.error(error);
       }
     }
   </script>
