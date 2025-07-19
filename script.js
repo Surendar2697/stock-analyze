@@ -12,7 +12,9 @@ async function fetchNews() {
   newsContainer.innerHTML = '';
 
   try {
-    const response = await fetch(`http://18.234.85.94:5000/get-news?query=${stockName}`);
+    const proxy = 'https://cors-anywhere.herokuapp.com/';
+    const api = `http://18.234.85.94:5000/get-news?query=${stockName}`;
+    const response = await fetch(proxy + api);
     const data = await response.json();
 
     loader.style.display = 'none';
@@ -22,8 +24,8 @@ async function fetchNews() {
       return;
     }
 
-    const list = document.createElement('ol'); // ordered list
-    data.headlines.forEach((headline, index) => {
+    const list = document.createElement('ol');
+    data.headlines.forEach(headline => {
       const li = document.createElement('li');
       li.textContent = headline;
       list.appendChild(li);
