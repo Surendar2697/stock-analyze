@@ -11,39 +11,51 @@
 
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
       margin: 0;
       background: #f9f9f9;
+    }
+
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 1000;
+      padding: 20px;
+      border-bottom: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
     }
 
     h1 {
       text-align: center;
       font-size: 2rem;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       color: #333;
     }
 
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    .input-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     input[type="text"] {
-      width: 100%;
+      flex: 1;
+      min-width: 250px;
       padding: 12px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      margin-bottom: 10px;
     }
 
     button {
-      width: 100%;
-      padding: 12px;
+      padding: 12px 24px;
       font-size: 16px;
       background-color: #007BFF;
       color: white;
@@ -91,6 +103,11 @@
         font-size: 1.5rem;
       }
 
+      .input-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+
       input[type="text"], button {
         font-size: 14px;
         padding: 10px;
@@ -103,12 +120,20 @@
   </style>
 </head>
 <body>
+
+  <!-- Sticky Top Section -->
+  <div class="sticky-header">
+    <div class="container">
+      <h1>Get Stock News (Last 24 Hrs)</h1>
+      <div class="input-group">
+        <input type="text" id="stockName" placeholder="Enter stock name (e.g., TCS)">
+        <button onclick="fetchNews()">Get News</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main News Section -->
   <div class="container">
-    <h1>Get Stock News (Last 24 Hrs)</h1>
-
-    <input type="text" id="stockName" placeholder="Enter stock name (e.g., TCS)">
-    <button onclick="fetchNews()">Get News</button>
-
     <div id="loader">Loading...</div>
     <div id="newsContainer"></div>
   </div>
@@ -129,15 +154,15 @@
 
       try {
         const proxy = 'https://cors-anywhere.herokuapp.com/';
-const target = `http://18.234.85.94:5000/get-news?query=${stockName}`;
+        const target = `http://18.234.85.94:5000/get-news?query=${stockName}`;
 
-const response = await fetch(proxy + target, {
-  method: 'GET',
-  headers: {
-    'Origin': 'https://surendar2697.github.io',
-    'X-Requested-With': 'XMLHttpRequest'
-  }
-});
+        const response = await fetch(proxy + target, {
+          method: 'GET',
+          headers: {
+            'Origin': 'https://surendar2697.github.io',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
 
         const data = await response.json();
         loader.style.display = 'none';
