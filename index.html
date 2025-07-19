@@ -96,7 +96,7 @@
       newsList.innerHTML = "Loading...";
 
       try {
-        const response = await fetch(`http://<YOUR-SERVER-IP>:5000/get-news?query=${query}`);
+        const response = await fetch(`http://18.234.85.94:5000/get-news?query=${query}`);
         const data = await response.json();
 
         if (data && Array.isArray(data.headlines)) {
