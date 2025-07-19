@@ -13,10 +13,14 @@ async function fetchNews() {
 
   try {
     const proxy = 'https://cors-anywhere.herokuapp.com/';
-    const api = `http://18.234.85.94:5000/get-news?query=${stockName}`;
-    const response = await fetch(proxy + api);
-    const data = await response.json();
+    const target = `http://18.234.85.94:5000/get-news?query=${stockName}`;
+    const response = await fetch(proxy + target, {
+      headers: {
+        'Origin': 'https://surendar2697.github.io'
+      }
+    });
 
+    const data = await response.json();
     loader.style.display = 'none';
 
     if (!data.headlines || data.headlines.length === 0) {
