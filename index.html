@@ -3,27 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <title>Stock News</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+      margin: 0;
+      background: #f9f9f9;
     }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
     #loader {
       display: none;
+      text-align: center;
+      margin: 15px 0;
+      font-weight: bold;
+      color: #555;
     }
-    ol {
+
+    #newsContainer {
       margin-top: 20px;
+    }
+
+    ol {
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      line-height: 1.5;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    p {
+      color: #888;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      input[type="text"], button {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      li {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Get Stock News (Last 24 Hrs)</h1>
+  <div class="container">
+    <h1>Get Stock News (Last 24 Hrs)</h1>
 
-  <input type="text" id="stockName" placeholder="Enter stock name (e.g., TCS)">
-  <button onclick="fetchNews()">Get News</button>
+    <input type="text" id="stockName" placeholder="Enter stock name (e.g., TCS)">
+    <button onclick="fetchNews()">Get News</button>
 
-  <div id="loader">Loading...</div>
-  <div id="newsContainer"></div>
+    <div id="loader">Loading...</div>
+    <div id="newsContainer"></div>
+  </div>
 
   <script>
     async function fetchNews() {
@@ -58,7 +146,7 @@
 
         const list = document.createElement('ol');
         data.headlines.forEach((headline, index) => {
-          const cleanHeadline = headline.replace(/^\d+\.\s*/, ''); // Remove leading numbers
+          const cleanHeadline = headline.replace(/^\d+\.\s*/, '');
           const li = document.createElement('li');
           li.textContent = cleanHeadline;
           list.appendChild(li);
